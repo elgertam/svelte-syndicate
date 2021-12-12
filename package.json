@@ -1,0 +1,56 @@
+{
+  "name": "svelte-syndicate",
+  "version": "0.1.0",
+  "description": "Svelte Syndicate is a Svelte plugin allowing developers to write programs in the Syndicate (https://syndicate-lang.org) dialect of Typescript.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "prebuild": "rm -rf dist/",
+    "build": "tsc --build tsconfig.build.json",
+    "dev": "npm run build -- -w",
+    "test": "jest",
+    "format": "prettier --write \"**/*.{ts,js,json}\"",
+    "prepublishOnly": "npm run test && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elgertam/svelte-syndicate.git"
+  },
+  "keywords": [
+    "svelte",
+    "syndicate",
+    "dataspace",
+    "distrubted"
+  ],
+  "author": "Andrew Elgert <andrew.elgert@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elgertam/svelte-syndicate/issues"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.ts",
+      "!<rootDir>/src/types/**/*.ts"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    }
+  },
+  "homepage": "https://github.com/elgertam/svelte-syndicate#readme",
+  "peerDependencies": {
+    "@syndicate-lang/compiler": "^0.10.2",
+    "svelte": "^3.44.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.3",
+    "jest": "^27.4.4",
+    "jshint": "^2.13.1",
+    "prettier": "^2.5.1",
+    "ts-jest": "^27.1.1",
+    "typescript": "^4.5.3"
+  }
+}
