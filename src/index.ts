@@ -1,40 +1,52 @@
 import type { CompileOptions } from '@syndicate-lang/compiler';
-import type { ErrorSink } from '@syndicate-lang/compiler/lib/compiler/codegen';
+import type { ErrorSink, ModuleType } from '@syndicate-lang/compiler/lib/compiler/codegen';
+import type { PreprocessorGroup } from 'svelte/types/compiler/preprocess';
 
-import * as svelte from 'svelte/compiler';
 import { compile as syndicateCompile } from '@syndicate-lang/compiler';
 
-export default async function preprocess(source: string) {
-  const { code } = await svelte.preprocess(source, {
-    script: ({content, attributes}) => {
-      const errSink: ErrorSink = (message, start, end) => {
-        console.log(message, start, end);
-      };
+export interface SyndicatePreprocessOptions {
+  runtime?: string,
+  module?: ModuleType,
+  global?: string,
+  typescript?: boolean,
+  emitError?: ErrorSink,
+};
 
-      let typescript: boolean;
-
-      if (attributes.lang === 'syndicate/js') {
-        typescript = false;
-      } else if (attributes.lang === 'syndicate/ts') {
-        typescript = true;
-      } else {
-        // nothing to do here
+export function preprocess(options?: SyndicatePreprocessOptions): PreprocessorGroup {
+  return {
+    script: ({content, attributes, filename}) => {
+      if (typeof attributes.lang === 'boolean') {
+        //nothing to do here
         return;
       }
 
-      const opts: CompileOptions = {
+      const lang = (attributes.lang ?? '').toLowerCase();
+      if (!lang.includes('syndicate')) {
+        //nothing to do here
+        return;
+      }
+
+      let typescript: boolean = false;
+      if (lang.includes('ts')) {
+        typescript = true;
+      }
+
+      const defaultOptions: CompileOptions = {
         source: content,
+        name: filename,
         typescript,
-        emitError: errSink,
+        emitError(message, start, end) {
+          console.log(message, start, end);
+        },
       };
 
-      const build = syndicateCompile(opts);
+      const fullOpts: CompileOptions = { ...defaultOptions, ...(options ?? {})};
 
-      return {
-        code: build.text,
-        map: build.map.mappings,
-      }
+      const { text, map } = syndicateCompile(fullOpts);
+
+      const code = '\n' + text;
+
+      return { code, map };
     }
-  });
-  return code;
-}
+  }
+};
